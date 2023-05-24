@@ -1,6 +1,6 @@
 # NLP Course Final Project: RoBERTa Model Training on RACE Dataset
 
-This repository contains the code and resources for my NLP course final project at Beijing University of Aeronautics and Astronautics (BUAA). The objective of this project is to train a RoBERTa model on the RACE dataset and provide evaluation metrics for the model's performance.
+This repository contains the code and resources for my NLP course final project at Beihang University (BUAA). The objective of this project is to train a RoBERTa model on the RACE dataset and provide evaluation metrics for the model's performance.
 
 ## About the RACE Dataset
 
