@@ -18,8 +18,8 @@ def evaluate_model(model, eval_loader, device):
             attention_mask = attention_mask.to(device)
             answer = answer.to(device)
 
-            logits = model(input_ids, attention_mask)
-            _, predicted = torch.max(logits, dim=1)
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=answer)
+            _, predicted = torch.max(outputs.logits, dim=1)
             total += answer.size(0)
             correct += (predicted == answer).sum().item()
     
