@@ -1,36 +1,39 @@
-from transformers import AutoTokenizer, RobertaForMultipleChoice
+import os
+
 import torch
+import transformers
+transformers.logging.set_verbosity_error()
+from torch.utils.data import DataLoader
 
-tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-model = RobertaForMultipleChoice.from_pretrained("roberta-base")
+from models.RoBERTa import RoBERTaClassifier
+from datasets.RACE_dataset import RACEDataset
+from utils.misc import evaluate_model
 
-prompt = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
-question1 = "Who is cool"
-choice0 = "It is eaten with a fork and a knife."
-choice1 = "It is eaten while held in the hand."
-# choice2 = "It is eaten while held in the hand."
-# choice3 = "It is eaten while held in the hand."
-labels = torch.tensor(0).unsqueeze(0)  # choice0 is correct (according to Wikipedia ;)), batch size 1
 
-encoding = tokenizer([(prompt + question1) for _ in range(3)], [choice0, choice1, choice0], return_tensors="pt", padding=True)
-# encoding = tokenizer.encode_plus([prompt, prompt], [choice0, choice1], return_tensors="pt", padding=True)
+def main():
+    checkponits_path = 'checkpoints/roberta_race.pt'
+    # 定义超参数
+    device = torch.device('cuda:3')
+    data_dir = './RACE/'
+    batch_size = 4
+    
 
-# print("====", encoding)
-input_ids = encoding['input_ids'].unsqueeze(0)
-attention_mask = encoding['attention_mask'].unsqueeze(0)
-print(input_ids.shape)
+    # 加载RACE数据集
+    test_dataset = RACEDataset(os.path.join(data_dir, 'test'))
+    print('Test dataset done')
 
-outputs = model(input_ids=input_ids, attention_mask=attention_mask)  # batch size is 1
+    # 创建DataLoader
+    test_loader = DataLoader(test_dataset, batch_size=batch_size)
+    print('Dataloader done')
 
-# the linear classifier still needs to be trained
-# loss = outputs.loss
-logits = outputs.logits
-print(logits.shape)
-# criterion = torch.nn.CrossEntropyLoss()
-# logits = torch.zeros(size=(1, 3)).float()
-# logits[0][0] = 1.0
-# print(logits)
-# labels = torch.tensor([[1, 0, 0]]).float()
-# print(labels)
-# loss = criterion(logits, labels)
-# print(loss)
+    # 创建RoBERTa模型
+    model = RoBERTaClassifier().to(device)
+    model.load_state_dict(torch.load(checkponits_path))
+    print('Mdeols done')
+
+    accuracy = evaluate_model(model, test_loader, device)
+    print(f'Accuracy on RACE test: {accuracy}')
+
+
+if __name__ == "__main__":
+    main()
