@@ -1,2 +1,3 @@
 ./RACE/
 ./checkpoints/
+./dist_train.sh
